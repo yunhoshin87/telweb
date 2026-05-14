@@ -1,0 +1,15 @@
+# 환경변수 / 시크릿
+backend/.env
+backend/*.env
+backend/session.json
+backend/session.sqlite
+backend/debug*.mjs
+backend/check-api.mjs
+backend/logs/
+
+# Node
+backend/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
