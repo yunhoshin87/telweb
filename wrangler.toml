@@ -1,0 +1,18 @@
+name = "telweb-ai"
+main = "backend/server.js"
+compatibility_date = "2024-05-14"
+compatibility_flags = ["nodejs_compat"]
+
+[site]
+bucket = "./frontend"
+
+[vars]
+# 필수 환경 변수 (대시보드에서 설정 가능)
+# API_ID = "..."
+# API_HASH = "..."
+# PHONE = "..."
+# MASTER_PASSWORD = "..."
+# GEMINI_API_KEY = "..."
+
+# 텔레그램 세션 유지를 위해 Workers KV나 Durable Objects를 쓸 수 있지만,
+# 우선은 간단하게 환경변수나 로컬 세션을 활용하는 구조로 배포를 시도합니다.

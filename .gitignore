@@ -9,6 +9,11 @@ backend/logs/
 
 # Node
 backend/node_modules/
+node_modules/
+
+# Cloudflare / Wrangler
+.wrangler/
+dist/
 
 # OS
 .DS_Store

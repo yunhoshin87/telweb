@@ -3,54 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TelWeb</title>
+  <title>TelWeb AI - Multi-Chat Master</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <!-- 사이드바 -->
-  <aside id="sidebar">
-    <div id="sidebar-header">
-      <div class="logo">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+<body class="dark-theme">
+  <!-- 로그인 오버레이 -->
+  <div id="login-overlay" class="overlay">
+    <div class="login-card">
+      <div class="logo-large">
+        <svg width="48" height="48" viewBox="0 0 22 22" fill="none">
           <path d="M11 2C6.03 2 2 6.03 2 11s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm3.5 5.5l-1.5 7-2.5-3-3 2 1.5-7 2.5 3 3-2z" fill="currentColor"/>
         </svg>
-        <span>TelWeb</span>
       </div>
-      <div id="conn-dot" class="dot disconnected" title="연결 상태"></div>
+      <h1>TelWeb AI</h1>
+      <p>마스터 계정으로 로그인하세요</p>
+      <input type="password" id="login-password" placeholder="비밀번호 입력" />
+      <button id="login-btn">로그인</button>
     </div>
+  </div>
 
-    <div id="search-wrap">
-      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-      <input id="search" type="text" placeholder="채팅 검색" autocomplete="off" />
-    </div>
-
-    <div id="dialog-list">
-      <div class="list-placeholder">
-        <div class="spinner"></div>
-        <span>채팅 불러오는 중</span>
-      </div>
-    </div>
-  </aside>
-
-  <!-- 메인 -->
-  <main id="main">
-    <div id="panels-wrap">
-      <div id="empty-state">
-        <div class="empty-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
+  <!-- 메인 앱 인터페이스 -->
+  <div id="app-container" class="hidden">
+    <!-- 사이드바 -->
+    <aside id="sidebar">
+      <div id="sidebar-header">
+        <div class="logo">
+          <span>TelWeb AI</span>
         </div>
-        <h2>채팅을 선택하세요</h2>
-        <p>왼쪽 목록에서 채팅을 클릭하면<br/>새 패널이 열립니다.</p>
+        <div id="conn-dot" class="dot disconnected"></div>
       </div>
-    </div>
-  </main>
+
+      <div id="search-wrap">
+        <input id="search" type="text" placeholder="채팅 검색" autocomplete="off" />
+      </div>
+
+      <div id="dialog-list">
+        <!-- 채팅 목록 -->
+      </div>
+    </aside>
+
+    <!-- 메인 대시보드 -->
+    <main id="main">
+      <!-- AI 마스터 패널 (고정) -->
+      <div id="ai-master-panel" class="chat-panel master">
+        <div class="panel-header">
+          <div class="panel-avatar ai">AI</div>
+          <div class="panel-name">AI 마스터 컨트롤</div>
+          <div class="ai-status">대기 중</div>
+        </div>
+        <div id="ai-log" class="messages">
+          <div class="msg-group in">
+            <div class="bubble">안녕하세요, 마스터님. 모든 채팅을 모니터링 중입니다.</div>
+          </div>
+        </div>
+        <div class="input-area">
+          <textarea id="ai-input" rows="1" placeholder="AI에게 명령 내리기... (예: 모든 안 읽은 메시지 요약해)"></textarea>
+          <button id="ai-send-btn" class="gold-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 일반 채팅 패널들 -->
+      <div id="panels-wrap">
+        <!-- 동적 추가 -->
+      </div>
+    </main>
+  </div>
 
   <script src="app.js"></script>
 </body>
