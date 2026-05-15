@@ -20,7 +20,7 @@ if (authToken) {
 loginBtn.onclick = async () => {
   const password = loginPass.value;
   try {
-    const res = await fetch(`${API}/login`, {
+    const res = await fetch(`${API}/api/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password })
@@ -106,7 +106,7 @@ aiSendBtn.onclick = async () => {
   aiInput.value = "";
   
   try {
-    const res = await apiFetch("/ai/command", {
+    const res = await apiFetch("/api/ai/command", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ command: text, history: [] })
@@ -129,7 +129,7 @@ function appendAiLog(text, isMaster = false) {
 // ── 기존 로직 (API Fetch 부분만 apiFetch로 교체) ──────────────────
 async function loadDialogs() {
   try {
-    const res = await apiFetch("/dialogs");
+    const res = await apiFetch("/api/dialogs");
     allDialogs = await res.json();
     renderDialogList(allDialogs);
   } catch {
@@ -163,7 +163,7 @@ async function openPanel(dialog) {
   document.getElementById("panels-wrap").appendChild(panel.el);
   openPanels[dialog.id] = panel;
 
-  const res = await apiFetch(`/history/${dialog.id}`);
+  const res = await apiFetch(`/api/history/${dialog.id}`);
   const msgs = await res.json();
   msgs.forEach(m => appendBubble(dialog.id, m));
 }
@@ -188,7 +188,7 @@ function buildPanel(dialog) {
     const text = input.value.trim();
     if (!text) return;
     input.value = "";
-    await apiFetch(`/send/${dialog.id}`, {
+    await apiFetch(`/api/send/${dialog.id}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text })

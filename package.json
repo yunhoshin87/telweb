@@ -1,9 +1,18 @@
 {
-  "name": "telweb-root",
+  "name": "telweb-ai",
   "version": "1.0.0",
-  "private": true,
+  "type": "module",
   "scripts": {
-    "build": "echo 'No build needed for frontend' && cd backend && npm install",
-    "install-backend": "cd backend && npm install"
+    "start": "node backend/server.js",
+    "build": "npm install && cd backend && npm install"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@mtcute/node": "^0.20.0",
+    "dotenv": "^16.4.5",
+    "hono": "^4.6.9"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

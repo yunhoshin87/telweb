@@ -10,6 +10,8 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@hono/node-server": "^2.0.2",
+    "@mtcute/core": "^0.29.7",
     "@mtcute/node": "^0.29.7",
     "dotenv": "^16.6.1",
     "express": "^4.22.2",
