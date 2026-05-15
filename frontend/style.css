@@ -20,6 +20,7 @@ body {
     background-color: var(--bg-main);
     color: var(--text-main);
     height: 100vh;
+    width: 100vw;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -47,45 +48,46 @@ body {
     height: calc(100vh - 80px);
 }
 
-/* Planner Sidebar (Left) */
+/* Planner Sidebar */
 .planner-sidebar {
-    width: 400px;
+    width: 380px;
     background: white;
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    box-shadow: 4px 0 12px rgba(0,0,0,0.05);
 }
 
-.planner-header {
-    background: #FFF;
-    border-bottom: 1px solid var(--border);
-    padding: 24px;
-}
-
-/* Chat Panels Grid (Right) */
+/* Chat Panels Grid */
 .dashboard-grid {
     flex: 1;
     display: flex;
-    gap: 24px;
-    padding: 24px;
+    gap: 20px;
+    padding: 20px;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: hidden; /* 세로 스크롤 방지 */
     background: #F7F7F7;
+    align-items: stretch; /* 패널들이 꽉 차게 */
 }
 
 .chat-panel {
-    min-width: 400px;
-    max-width: 450px;
+    width: 420px;
+    min-width: 420px;
     background: white;
     border-radius: var(--radius-large);
     box-shadow: var(--shadow);
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* 세로 배치 */
     border: 1px solid var(--border);
-    height: 100%; /* 패널이 화면 꽉 차게 */
+    height: 100%; /* 부모 높이 꽉 차게 */
     overflow: hidden;
+    transition: transform 0.2s;
+}
+
+/* 드래그 중인 패널 스타일 */
+.chat-panel.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
 }
 
 .panel-header {
@@ -94,14 +96,17 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-shrink: 0;
+    cursor: grab; /* 손바닥 모양 */
+    background: white;
+    flex-shrink: 0; /* 헤더 크기 고정 */
 }
 
-/* 메시지 영역 - 가려짐 해결의 핵심 */
+.panel-header:active { cursor: grabbing; }
+
 .message-area {
-    flex: 1;
-    padding: 24px;
-    overflow-y: auto;
+    flex: 1; /* 남은 공간 모두 차지 */
+    padding: 20px;
+    overflow-y: auto; /* 여기만 스크롤 */
     background: #FAFAFA;
     display: flex;
     flex-direction: column;
@@ -114,20 +119,18 @@ body {
     border-radius: 18px;
     font-size: 14px;
     line-height: 1.5;
-    word-break: break-all;
 }
-
 .message.received { background: white; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 .message.sent { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
 
-/* 푸터 고정 */
+/* 푸터 하단 고정 - flex-shrink가 핵심 */
 .panel-footer {
-    padding: 20px;
+    padding: 16px 20px;
     border-top: 1px solid var(--border);
     display: flex;
-    gap: 12px;
+    gap: 10px;
     background: white;
-    flex-shrink: 0;
+    flex-shrink: 0; /* 무조건 보이게 고정 */
 }
 
 .panel-input {
@@ -137,10 +140,7 @@ body {
     border: 1px solid var(--border);
     font-size: 14px;
     outline: none;
-    transition: all 0.2s;
 }
-
-.panel-input:focus { border-color: var(--primary); background: white; }
 
 .ai-badge {
     background: linear-gradient(135deg, #FF385C, #BD1E59);
@@ -158,6 +158,5 @@ body {
 }
 .chat-dropdown { padding: 12px; border-radius: 12px; border: 1px solid #DDD; background: #F7F7F7; }
 
-/* Login Screen */
 #login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; background: #FF385C; }
 .login-card { background: white; padding: 48px; border-radius: 24px; width: 400px; text-align: center; }
