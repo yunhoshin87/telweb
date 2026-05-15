@@ -11,7 +11,6 @@
     --shadow: 0 6px 16px rgba(0,0,0,0.12);
     --radius: 12px;
     --radius-large: 24px;
-    --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,6 +21,8 @@ body {
     color: var(--text-main);
     height: 100vh;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Header */
@@ -33,45 +34,47 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    z-index: 100;
+    flex-shrink: 0;
 }
 
 .logo { color: var(--primary); font-weight: 800; font-size: 24px; }
 
-.header-right { display: flex; gap: 16px; align-items: center; }
+/* Dashboard Wrapper */
+.dashboard-wrapper {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 80px);
+}
 
-.chat-dropdown {
-    padding: 12px 20px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 14px;
-    outline: none;
+/* Planner Sidebar (Left) */
+.planner-sidebar {
+    width: 400px;
+    background: white;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    box-shadow: 4px 0 12px rgba(0,0,0,0.05);
+}
+
+.planner-header {
+    background: #FFF;
+    border-bottom: 1px solid var(--border);
+    padding: 24px;
+}
+
+/* Chat Panels Grid (Right) */
+.dashboard-grid {
+    flex: 1;
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+    overflow-x: auto;
+    overflow-y: hidden;
     background: #F7F7F7;
 }
 
-/* Dashboard Grid */
-.dashboard-grid {
-    flex: 1;
-    padding: 24px;
-    display: flex;
-    gap: 24px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    align-items: stretch;
-}
-
-.empty-state {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-}
-
-.empty-icon { font-size: 64px; margin-bottom: 16px; }
-
-/* Chat Panel Card */
 .chat-panel {
     min-width: 400px;
     max-width: 450px;
@@ -81,7 +84,8 @@ body {
     display: flex;
     flex-direction: column;
     border: 1px solid var(--border);
-    transition: var(--transition);
+    height: 100%; /* 패널이 화면 꽉 차게 */
+    overflow: hidden;
 }
 
 .panel-header {
@@ -90,51 +94,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 }
 
-.panel-title h3 { font-size: 16px; font-weight: 700; }
-
-.close-btn {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-size: 20px;
-    padding: 4px;
-}
-
-.ai-mini-btn {
-    background: #F7F7F7;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    transition: var(--transition);
-}
-
-.ai-mini-btn:hover {
-    background: white;
-    transform: scale(1.1);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
+/* 메시지 영역 - 가려짐 해결의 핵심 */
 .message-area {
     flex: 1;
-    padding: 20px;
+    padding: 24px;
     overflow-y: auto;
     background: #FAFAFA;
     display: flex;
@@ -144,46 +110,54 @@ body {
 
 .message {
     max-width: 85%;
-    padding: 10px 14px;
+    padding: 12px 16px;
     border-radius: 18px;
     font-size: 14px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    line-height: 1.5;
+    word-break: break-all;
 }
 
-.message.received { background: white; align-self: flex-start; border-bottom-left-radius: 4px; }
+.message.received { background: white; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 .message.sent { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
 
+/* 푸터 고정 */
 .panel-footer {
-    padding: 16px;
+    padding: 20px;
     border-top: 1px solid var(--border);
     display: flex;
-    gap: 8px;
+    gap: 12px;
+    background: white;
+    flex-shrink: 0;
 }
 
 .panel-input {
     flex: 1;
-    padding: 10px 16px;
+    padding: 12px 16px;
     border-radius: var(--radius);
     border: 1px solid var(--border);
     font-size: 14px;
     outline: none;
+    transition: all 0.2s;
 }
 
-/* Buttons */
+.panel-input:focus { border-color: var(--primary); background: white; }
+
+.ai-badge {
+    background: linear-gradient(135deg, #FF385C, #BD1E59);
+    color: white; padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; margin-right: 8px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #DDD; border-radius: 10px; }
+
 .btn-primary {
-    background: var(--primary); color: white; border: none; padding: 12px 24px;
-    border-radius: var(--radius); font-weight: 600; cursor: pointer; transition: var(--transition);
+    background: var(--primary); color: white; border: none; padding: 12px 20px;
+    border-radius: var(--radius); font-weight: 600; cursor: pointer;
 }
-.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.chat-dropdown { padding: 12px; border-radius: 12px; border: 1px solid #DDD; background: #F7F7F7; }
 
-.btn-secondary {
-    background: white; color: var(--text-main); border: 1px solid var(--border);
-    padding: 10px 20px; border-radius: var(--radius); cursor: pointer;
-}
-
-/* Login */
-#login-screen {
-    display: flex; align-items: center; justify-content: center; height: 100vh;
-    background: linear-gradient(45deg, #FF385C, #BD1E59);
-}
-.login-card { background: white; padding: 48px; border-radius: var(--radius-large); width: 400px; text-align: center; }
+/* Login Screen */
+#login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; background: #FF385C; }
+.login-card { background: white; padding: 48px; border-radius: 24px; width: 400px; text-align: center; }

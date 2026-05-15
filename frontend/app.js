@@ -1,6 +1,6 @@
 let authToken = localStorage.getItem('authToken');
 let allDialogs = [];
-const activePanels = new Set();
+const activePanels = new Map(); // chatId -> Panel Name
 
 document.addEventListener('DOMContentLoaded', () => {
     if (authToken) {
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 로그인
+// 로그인 및 초기화 로직 (이전과 동일)
 document.getElementById('login-btn').addEventListener('click', async () => {
     const password = document.getElementById('password-input').value;
     const res = await fetch('/api/login', {
@@ -23,9 +23,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
         localStorage.setItem('authToken', authToken);
         showApp();
         loadInitialData();
-    } else {
-        alert('비밀번호가 올바르지 않습니다.');
-    }
+    } else { alert('비밀번호 오류'); }
 });
 
 function showApp() {
@@ -48,92 +46,45 @@ async function loadInitialData() {
     });
 }
 
-// 패널 추가 버튼
+// 패널 추가
 document.getElementById('add-panel-btn').addEventListener('click', () => {
     const chatId = document.getElementById('chat-selector').value;
-    if (!chatId) return alert('채팅방을 선택해주세요.');
-    if (activePanels.has(chatId)) return alert('이미 추가된 채팅방입니다.');
-    
+    if (!chatId || activePanels.has(chatId)) return;
     const chat = allDialogs.find(d => d.id === chatId);
     createChatPanel(chatId, chat.name);
 });
 
 function createChatPanel(chatId, name) {
     document.getElementById('empty-state').style.display = 'none';
-    activePanels.add(chatId);
+    activePanels.set(chatId, name);
 
     const panel = document.createElement('div');
     panel.className = 'chat-panel';
     panel.id = `panel-${chatId}`;
     panel.innerHTML = `
         <div class="panel-header">
-            <div class="panel-title">
-                <h3>${name}</h3>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button class="ai-mini-btn" title="AI 요약">✨</button>
-                <button class="close-btn">&times;</button>
-            </div>
+            <div class="panel-title"><h3>${name}</h3></div>
+            <button class="close-btn">&times;</button>
         </div>
-        <div class="message-area" id="msg-area-${chatId}">
-            <div class="loading">메시지 불러오는 중...</div>
-        </div>
+        <div class="message-area" id="msg-area-${chatId}"></div>
         <div class="panel-footer">
-            <input type="text" class="panel-input" placeholder="메시지 입력..." id="input-${chatId}">
-            <button class="btn-primary send-mini-btn">전송</button>
+            <input type="text" class="panel-input" id="input-${chatId}" placeholder="메시지 전송...">
+            <button class="btn-primary" onclick="sendMessage('${chatId}')">전송</button>
         </div>
     `;
 
-    // 닫기 버튼
     panel.querySelector('.close-btn').onclick = () => {
         panel.remove();
         activePanels.delete(chatId);
         if (activePanels.size === 0) document.getElementById('empty-state').style.display = 'flex';
     };
 
-    // 전송 버튼
-    const input = panel.querySelector('.panel-input');
-    const sendBtn = panel.querySelector('.send-mini-btn');
-    const doSend = async () => {
-        const text = input.value;
-        if (!text) return;
-        await fetch(`/api/send/${chatId}`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}` 
-            },
-            body: JSON.stringify({ text })
-        });
-        input.value = '';
-        refreshMessages(chatId);
-    };
-    sendBtn.onclick = doSend;
-    input.onkeypress = (e) => { if (e.key === 'Enter') doSend(); };
-
-    // AI 요약 버튼
-    panel.querySelector('.ai-mini-btn').onclick = async () => {
-        const btn = panel.querySelector('.ai-mini-btn');
-        btn.innerText = '⌛';
-        const res = await fetch('/api/ai/command', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ command: `${chatId}번 채팅의 최근 대화를 3줄로 요약해줘.` })
-        });
-        const data = await res.json();
-        alert(`[${name} AI 요약]\n\n${data.response}`);
-        btn.innerText = '✨';
-    };
-
     document.getElementById('panel-container').appendChild(panel);
     refreshMessages(chatId);
     
-    // 자동 갱신 (10초마다)
-    const interval = setInterval(() => {
-        if (!activePanels.has(chatId)) return clearInterval(interval);
+    // 10초마다 자동 갱신
+    const itv = setInterval(() => {
+        if (!activePanels.has(chatId)) return clearInterval(itv);
         refreshMessages(chatId);
     }, 10000);
 }
@@ -144,6 +95,7 @@ async function refreshMessages(chatId) {
     });
     const messages = await res.json();
     const area = document.getElementById(`msg-area-${chatId}`);
+    if (!area) return;
     area.innerHTML = '';
     messages.forEach(m => {
         const msgDiv = document.createElement('div');
@@ -154,7 +106,73 @@ async function refreshMessages(chatId) {
     area.scrollTop = area.scrollHeight;
 }
 
-document.getElementById('logout-btn').onclick = () => {
-    localStorage.removeItem('authToken');
-    location.reload();
+async function sendMessage(chatId, text = null) {
+    const input = document.getElementById(`input-${chatId}`);
+    const msgText = text || input.value;
+    if (!msgText) return;
+
+    await fetch(`/api/send/${chatId}`, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}` 
+        },
+        body: JSON.stringify({ text: msgText })
+    });
+    if (input) input.value = '';
+    refreshMessages(chatId);
+}
+
+// --- [AI 기획자 봇 핵심 로직] ---
+
+const plannerInput = document.getElementById('planner-input');
+const plannerBtn = document.getElementById('planner-send-btn');
+const plannerMessages = document.getElementById('planner-messages');
+
+plannerBtn.onclick = async () => {
+    const text = plannerInput.value;
+    if (!text) return;
+
+    // 1. 내 메시지 추가
+    appendPlannerMessage('sent', text);
+    plannerInput.value = '';
+
+    // 2. AI 기획자에게 지시 전달
+    try {
+        const res = await fetch('/api/ai/planner', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}` 
+            },
+            body: JSON.stringify({ 
+                command: text,
+                activeChats: Array.from(activePanels.entries()).map(([id, name]) => ({ id, name }))
+            })
+        });
+        const data = await res.json();
+        
+        // 3. AI 답변 추가
+        appendPlannerMessage('received', data.reply);
+
+        // 4. AI가 지시한 행동(메시지 대리 전송) 실행
+        if (data.actions && data.actions.length > 0) {
+            data.actions.forEach(action => {
+                sendMessage(action.chatId, action.text);
+                appendPlannerMessage('received', `✅ [${action.targetName}] 방에 메시지를 전달했습니다.`);
+            });
+        }
+    } catch (e) {
+        appendPlannerMessage('received', '⚠️ 지시를 처리하는 중 오류가 발생했습니다.');
+    }
 };
+
+function appendPlannerMessage(type, text) {
+    const div = document.createElement('div');
+    div.className = `message ${type}`;
+    div.innerText = text;
+    plannerMessages.appendChild(div);
+    plannerMessages.scrollTop = plannerMessages.scrollHeight;
+}
+
+plannerInput.onkeypress = (e) => { if (e.key === 'Enter') plannerBtn.click(); };

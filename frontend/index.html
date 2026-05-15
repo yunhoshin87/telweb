@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TelWeb AI | Multi-Panel Dashboard</title>
+    <title>TelWeb AI | Command Center</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
 </head>
 <body>
     <!-- Login Screen -->
     <div id="login-screen">
         <div class="login-card">
             <h1>TelWeb AI</h1>
-            <p>기획서 기반의 멀티 패널 대시보드</p>
+            <p>AI 기획자와 함께하는 지능형 대시보드</p>
             <div class="input-group">
                 <input type="password" id="password-input" placeholder="마스터 비밀번호 입력">
             </div>
@@ -36,12 +36,31 @@
             </div>
         </header>
 
-        <!-- Multi-Panel Container -->
-        <main class="dashboard-grid" id="panel-container">
-            <!-- Chat panels will be added here side-by-side -->
-            <div class="empty-state" id="empty-state">
-                <div class="empty-icon">🏠</div>
-                <p>상단에서 채팅방을 선택하고 패널을 추가해 보세요.</p>
+        <!-- Command Center Layout -->
+        <main class="dashboard-wrapper">
+            <!-- Fixed Planner Side (Left) -->
+            <aside class="planner-sidebar" id="planner-panel">
+                <div class="panel-header planner-header">
+                    <div class="panel-title">
+                        <span class="ai-badge">Master</span>
+                        <h3>AI 기획자 봇</h3>
+                    </div>
+                </div>
+                <div class="message-area" id="planner-messages">
+                    <div class="message received">안녕하세요! 저는 기획자 봇입니다. 지시를 내리시면 각 채팅방에 기획 오더를 전달해 드릴게요.</div>
+                </div>
+                <div class="panel-footer">
+                    <input type="text" class="panel-input" id="planner-input" placeholder="기획 지시를 입력하세요 (예: 모든 방에 공지해)">
+                    <button class="btn-primary" id="planner-send-btn">명령</button>
+                </div>
+            </aside>
+
+            <!-- Dynamic Chat Grid (Right) -->
+            <div class="dashboard-grid" id="panel-container">
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-icon">🏠</div>
+                    <p>협업 중인 채팅방 패널을 추가해 주세요.</p>
+                </div>
             </div>
         </main>
     </div>
