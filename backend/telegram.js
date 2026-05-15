@@ -1,5 +1,5 @@
-import { TelegramClient, Api } from "gramjs";
-import { StringSession } from "gramjs/sessions/index.js";
+import { TelegramClient, Api } from "telegram";
+import { StringSession } from "telegram/sessions/index.js";
 import input from "input";
 
 let client = null;
@@ -20,11 +20,13 @@ export async function connect() {
     onError: (err) => console.error("[Telegram] Error:", err.message),
   });
 
-  console.log("[Telegram] gramjs 연결 성공!");
-  // 세션 문자열이 바뀌었을 수 있으므로 출력
+  console.log("[Telegram] 연결 성공!");
   const currentSession = client.session.save();
   if (currentSession !== sessionString) {
     console.log("[System] 새로운 세션 문자열이 생성되었습니다. (Render SESSION_DATA 업데이트 필요)");
+    console.log("-----------------------------------------");
+    console.log(currentSession);
+    console.log("-----------------------------------------");
   }
 }
 
@@ -72,5 +74,5 @@ export async function sendMessage(chatId, text) {
 }
 
 export function onNewMessage(callback) {
-  // gramjs의 이벤트 핸들러는 필요 시 추가 구현 가능
+  // 필요 시 추가 구현
 }

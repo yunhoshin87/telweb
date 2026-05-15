@@ -8,7 +8,7 @@
   "dependencies": {
     "@hono/node-server": "^1.13.7",
     "dotenv": "^16.4.5",
-    "gramjs": "^2.26.16",
+    "telegram": "^2.26.16",
     "hono": "^4.6.9",
     "input": "^1.0.1"
   },
