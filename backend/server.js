@@ -4,11 +4,17 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { cors } from "hono/cors";
 import * as tg from "./telegram.js";
 import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
 dotenv.config();
 
-// 서버 시작 로그
-console.log("[System] 서버 초기화 중...");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// 프로젝트 루트 경로 (backend의 상위 폴더)
+const rootPath = join(__dirname, "..");
+
+console.log("[System] 서버 초기화 중... (Root:", rootPath, ")");
 
 const app = new Hono();
 
@@ -17,6 +23,7 @@ app.use("*", cors());
 const MASTER_PASSWORD = () => process.env.MASTER_PASSWORD || "admin123";
 const AUTH_TOKEN = () => Buffer.from(MASTER_PASSWORD()).toString("base64");
 
+// API 인증
 app.use("/api/*", async (c, next) => {
   if (c.req.path === "/api/login") return await next();
   const authHeader = c.req.header("Authorization");
@@ -26,6 +33,7 @@ app.use("/api/*", async (c, next) => {
   await next();
 });
 
+// API 엔드포인트들
 app.post("/api/login", async (c) => {
   const { password } = await c.req.json();
   if (password === MASTER_PASSWORD()) return c.json({ token: AUTH_TOKEN() });
@@ -63,23 +71,23 @@ app.post("/api/send/:chatId", async (c) => {
   } catch (e) { return c.json({ error: e.message }, 500); }
 });
 
-// 정적 파일 서비스
-app.get("*", serveStatic({ root: "./" }));
+// 정적 파일 서비스 (절대 경로 사용)
+app.use("/*", serveStatic({ 
+  root: "./",
+  rewriteRequestPath: (path) => (path === "/" ? "/index.html" : path)
+}));
 
 async function startServer() {
   try {
     console.log("[Telegram] 연결 시도 중...");
     await tg.connect();
-    console.log("[Telegram] 연결 성공!");
     
-    const port = process.env.PORT || 10000; // Render 기본 포트 대응
+    const port = process.env.PORT || 10000;
     serve({ fetch: app.fetch, port: Number(port) }, (info) => {
-      console.log(`[System] 서버 실행 완료! URL: http://localhost:${info.port}`);
+      console.log(`[System] 서버 실행 완료! 포트: ${info.port}`);
     });
   } catch (e) {
-    console.error("[Error] 서버 시작 중 치명적 오류 발생:");
-    console.error(e);
-    // 에러 발생 시 10초 후 재시도
+    console.error("[Error] 서버 시작 중 오류:", e.message);
     setTimeout(startServer, 10000);
   }
 }

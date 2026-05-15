@@ -13,21 +13,26 @@ export async function connect() {
     connectionRetries: 5,
   });
 
+  // 로그인이 필요한 경우에만 입력창을 띄웁니다.
   await client.start({
-    phoneNumber: async () => process.env.PHONE || "",
-    password: async () => "", 
-    phoneCode: async () => "",
-    onError: (err) => console.error("[Telegram] Error:", err.message),
+    phoneNumber: async () => process.env.PHONE || await input.text("전화번호(+82...): "),
+    password: async () => await input.text("2단계 인증 비번(없으면 엔터): "),
+    phoneCode: async () => await input.text("텔레그램에서 받은 인증번호: "),
+    onError: (err) => {
+      if (err.message !== "Code is empty") {
+         console.error("[Telegram] Error:", err.message);
+      }
+    },
   });
 
-  console.log("[Telegram] 연결 성공!");
+  console.log("\n[Telegram] 연결 성공!");
   const currentSession = client.session.save();
-  if (currentSession !== sessionString) {
-    console.log("[System] 새로운 세션 문자열이 생성되었습니다. (Render SESSION_DATA 업데이트 필요)");
-    console.log("-----------------------------------------");
-    console.log(currentSession);
-    console.log("-----------------------------------------");
-  }
+  
+  // 세션이 새로 생성되었거나 바뀐 경우 출력
+  console.log("\n-----------------------------------------");
+  console.log("새로운 SESSION_DATA (복사해서 Render에 넣으세요):");
+  console.log(currentSession);
+  console.log("-----------------------------------------\n");
 }
 
 export async function getDialogs() {
@@ -39,10 +44,7 @@ export async function getDialogs() {
       name: d.title || d.name || "Unknown",
       unread: d.unreadCount || 0,
     }));
-  } catch (e) {
-    console.error("Dialogs error:", e.message);
-    return [];
-  }
+  } catch (e) { return []; }
 }
 
 export async function getHistory(chatId, limit = 50) {
@@ -57,10 +59,7 @@ export async function getHistory(chatId, limit = 50) {
       date: new Date(m.date * 1000).toISOString(),
       out: m.out,
     })).reverse();
-  } catch (e) {
-    console.error("History error:", e.message);
-    return [];
-  }
+  } catch (e) { return []; }
 }
 
 export function isConnected() {
@@ -73,6 +72,4 @@ export async function sendMessage(chatId, text) {
   return { text: result.message };
 }
 
-export function onNewMessage(callback) {
-  // 필요 시 추가 구현
-}
+export function onNewMessage(callback) { }
