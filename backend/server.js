@@ -11,10 +11,11 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-// 프로젝트 루트 경로 (backend의 상위 폴더)
+// backend 폴더의 상위 폴더인 프로젝트 루트 경로
 const rootPath = join(__dirname, "..");
 
-console.log("[System] 서버 초기화 중... (Root:", rootPath, ")");
+console.log(`[System] 서버 시작 중...`);
+console.log(`[System] 루트 경로: ${rootPath}`);
 
 const app = new Hono();
 
@@ -71,9 +72,9 @@ app.post("/api/send/:chatId", async (c) => {
   } catch (e) { return c.json({ error: e.message }, 500); }
 });
 
-// 정적 파일 서비스 (절대 경로 사용)
+// 정적 파일 서비스 (frontend 폴더 지정)
 app.use("/*", serveStatic({ 
-  root: "./",
+  root: "./frontend", // CWD 기준 (루트 폴더)
   rewriteRequestPath: (path) => (path === "/" ? "/index.html" : path)
 }));
 
