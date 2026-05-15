@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TelWeb AI | Dashboard</title>
+    <title>TelWeb AI | Multi-Panel Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
 </head>
@@ -12,7 +12,7 @@
     <div id="login-screen">
         <div class="login-card">
             <h1>TelWeb AI</h1>
-            <p>에어비앤비 스타일로 다시 태어난 대시보드</p>
+            <p>기획서 기반의 멀티 패널 대시보드</p>
             <div class="input-group">
                 <input type="password" id="password-input" placeholder="마스터 비밀번호 입력">
             </div>
@@ -21,41 +21,29 @@
     </div>
 
     <!-- Main Dashboard -->
-    <div id="app-container" style="display: none;">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>메시지</h2>
+    <div id="app-container" style="display: none; flex-direction: column;">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <h2 class="logo">TelWeb AI</h2>
             </div>
-            <div class="chat-list" id="chat-list">
-                <!-- Chat items will be injected here -->
+            <div class="header-right">
+                <select id="chat-selector" class="chat-dropdown">
+                    <option value="">채팅방 선택...</option>
+                </select>
+                <button class="btn-primary" id="add-panel-btn">+ 패널 추가</button>
+                <button class="btn-secondary" id="logout-btn">로그아웃</button>
             </div>
-        </div>
+        </header>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="chat-header">
-                <div class="chat-title">
-                    <span class="ai-badge">AI Assistant</span>
-                    <h3 id="current-chat-name">채팅을 선택하세요</h3>
-                </div>
-                <div class="chat-actions">
-                    <button class="btn-primary" style="padding: 8px 16px; font-size: 14px;" id="ai-summarize-btn">AI 요약</button>
-                </div>
+        <!-- Multi-Panel Container -->
+        <main class="dashboard-grid" id="panel-container">
+            <!-- Chat panels will be added here side-by-side -->
+            <div class="empty-state" id="empty-state">
+                <div class="empty-icon">🏠</div>
+                <p>상단에서 채팅방을 선택하고 패널을 추가해 보세요.</p>
             </div>
-
-            <div class="message-area" id="message-area">
-                <!-- Messages will be injected here -->
-                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #717171;">
-                    왼쪽에서 대화 상대를 선택해 주세요.
-                </div>
-            </div>
-
-            <div class="input-area">
-                <input type="text" class="chat-input" id="message-input" placeholder="메시지를 입력하세요...">
-                <button class="btn-primary" style="width: auto; padding: 12px 32px;" id="send-btn">전송</button>
-            </div>
-        </div>
+        </main>
     </div>
 
     <script src="app.js"></script>
