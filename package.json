@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node backend/server.js",
-    "build": "npm install && cd backend && npm install"
+    "start": "node backend/server.js"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
     "@mtcute/node": "^0.20.0",
     "dotenv": "^16.4.5",
-    "hono": "^4.6.9"
+    "hono": "^4.6.9",
+    "@hono/node-server/serve-static": "^1.13.7"
   },
   "engines": {
     "node": ">=20.0.0"
