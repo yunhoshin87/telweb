@@ -1,79 +1,63 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TelWeb AI - Multi-Chat Master</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TelWeb AI | Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
 </head>
-<body class="dark-theme">
-  <!-- 로그인 오버레이 -->
-  <div id="login-overlay" class="overlay">
-    <div class="login-card">
-      <div class="logo-large">
-        <svg width="48" height="48" viewBox="0 0 22 22" fill="none">
-          <path d="M11 2C6.03 2 2 6.03 2 11s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm3.5 5.5l-1.5 7-2.5-3-3 2 1.5-7 2.5 3 3-2z" fill="currentColor"/>
-        </svg>
-      </div>
-      <h1>TelWeb AI</h1>
-      <p>마스터 계정으로 로그인하세요</p>
-      <input type="password" id="login-password" placeholder="비밀번호 입력" />
-      <button id="login-btn">로그인</button>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h1>TelWeb AI</h1>
+            <p>에어비앤비 스타일로 다시 태어난 대시보드</p>
+            <div class="input-group">
+                <input type="password" id="password-input" placeholder="마스터 비밀번호 입력">
+            </div>
+            <button class="btn-primary" id="login-btn">대시보드 입장</button>
+        </div>
     </div>
-  </div>
 
-  <!-- 메인 앱 인터페이스 -->
-  <div id="app-container" class="hidden">
-    <!-- 사이드바 -->
-    <aside id="sidebar">
-      <div id="sidebar-header">
-        <div class="logo">
-          <span>TelWeb AI</span>
+    <!-- Main Dashboard -->
+    <div id="app-container" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>메시지</h2>
+            </div>
+            <div class="chat-list" id="chat-list">
+                <!-- Chat items will be injected here -->
+            </div>
         </div>
-        <div id="conn-dot" class="dot disconnected"></div>
-      </div>
 
-      <div id="search-wrap">
-        <input id="search" type="text" placeholder="채팅 검색" autocomplete="off" />
-      </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <span class="ai-badge">AI Assistant</span>
+                    <h3 id="current-chat-name">채팅을 선택하세요</h3>
+                </div>
+                <div class="chat-actions">
+                    <button class="btn-primary" style="padding: 8px 16px; font-size: 14px;" id="ai-summarize-btn">AI 요약</button>
+                </div>
+            </div>
 
-      <div id="dialog-list">
-        <!-- 채팅 목록 -->
-      </div>
-    </aside>
+            <div class="message-area" id="message-area">
+                <!-- Messages will be injected here -->
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #717171;">
+                    왼쪽에서 대화 상대를 선택해 주세요.
+                </div>
+            </div>
 
-    <!-- 메인 대시보드 -->
-    <main id="main">
-      <!-- AI 마스터 패널 (고정) -->
-      <div id="ai-master-panel" class="chat-panel master">
-        <div class="panel-header">
-          <div class="panel-avatar ai">AI</div>
-          <div class="panel-name">AI 마스터 컨트롤</div>
-          <div class="ai-status">대기 중</div>
+            <div class="input-area">
+                <input type="text" class="chat-input" id="message-input" placeholder="메시지를 입력하세요...">
+                <button class="btn-primary" style="width: auto; padding: 12px 32px;" id="send-btn">전송</button>
+            </div>
         </div>
-        <div id="ai-log" class="messages">
-          <div class="msg-group in">
-            <div class="bubble">안녕하세요, 마스터님. 모든 채팅을 모니터링 중입니다.</div>
-          </div>
-        </div>
-        <div class="input-area">
-          <textarea id="ai-input" rows="1" placeholder="AI에게 명령 내리기... (예: 모든 안 읽은 메시지 요약해)"></textarea>
-          <button id="ai-send-btn" class="gold-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-          </button>
-        </div>
-      </div>
+    </div>
 
-      <!-- 일반 채팅 패널들 -->
-      <div id="panels-wrap">
-        <!-- 동적 추가 -->
-      </div>
-    </main>
-  </div>
-
-  <script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

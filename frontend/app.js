@@ -1,211 +1,135 @@
-const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-const API = isLocal ? "http://localhost:8000" : `${location.protocol}//${location.host}`;
-const WS_URL = isLocal ? "ws://localhost:8000/ws" : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
+let authToken = localStorage.getItem('authToken');
+let currentChatId = null;
 
-let allDialogs = [];
-let openPanels = {};
-let ws;
-let authToken = localStorage.getItem("telweb_token");
-
-// ── 로그인 관리 ───────────────────────────────────────────────────
-const loginOverlay = document.getElementById("login-overlay");
-const appContainer = document.getElementById("app-container");
-const loginBtn = document.getElementById("login-btn");
-const loginPass = document.getElementById("login-password");
-
-if (authToken) {
-  showApp();
-}
-
-loginBtn.onclick = async () => {
-  const password = loginPass.value;
-  try {
-    const res = await fetch(`${API}/api/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password })
-    });
-    const data = await res.json();
-    if (data.token) {
-      authToken = data.token;
-      localStorage.setItem("telweb_token", authToken);
-      showApp();
-    } else {
-      alert("비밀번호가 틀렸습니다.");
+// 초기화
+document.addEventListener('DOMContentLoaded', () => {
+    if (authToken) {
+        showApp();
+        loadDialogs();
     }
-  } catch {
-    alert("서버 연결 실패");
-  }
-};
+});
+
+// 로그인 처리
+document.getElementById('login-btn').addEventListener('click', async () => {
+    const password = document.getElementById('password-input').value;
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            authToken = data.token;
+            localStorage.setItem('authToken', authToken);
+            showApp();
+            loadDialogs();
+        } else {
+            alert('비밀번호가 틀렸습니다.');
+        }
+    } catch (e) { alert('로그인 중 오류 발생'); }
+});
 
 function showApp() {
-  loginOverlay.classList.add("hidden");
-  appContainer.classList.remove("hidden");
-  startApp();
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-container').style.display = 'flex';
 }
 
-function startApp() {
-  connectWS();
-  loadDialogs();
-}
-
-async function apiFetch(path, options = {}) {
-  options.headers = {
-    ...options.headers,
-    "Authorization": `Bearer ${authToken}`
-  };
-  const res = await fetch(`${API}${path}`, options);
-  if (res.status === 401) {
-    localStorage.removeItem("telweb_token");
-    location.reload();
-  }
-  return res;
-}
-
-// ── WebSocket ────────────────────────────────────────────────────────
-function connectWS() {
-  ws = new WebSocket(WS_URL);
-  ws.onopen = () => {
-    setDot("connected");
-    // 연결 후 토큰 전송 (인증)
-    ws.send(JSON.stringify({ type: "auth", token: authToken }));
-  };
-  ws.onclose = () => { setDot("disconnected"); setTimeout(connectWS, 3000); };
-  ws.onmessage = (e) => {
-    const data = JSON.parse(e.data);
-    if (data.type === "message") {
-      if (openPanels[data.chatId]) {
-        appendBubble(data.chatId, data);
-        apiFetch(`/read/${data.chatId}`, { method: "POST" });
-      } else {
-        incrementUnreadBadge(data.chatId);
-      }
-      // AI 마스터에게도 로그 전달
-      appendAiLog(`[${data.sender}] ${data.text}`);
-    }
-  };
-}
-
-function setDot(state) {
-  const dot = document.getElementById("conn-dot");
-  if (dot) {
-    dot.className = `dot ${state}`;
-  }
-}
-
-// ── AI 마스터 컨트롤 ─────────────────────────────────────────────
-const aiInput = document.getElementById("ai-input");
-const aiSendBtn = document.getElementById("ai-send-btn");
-const aiLog = document.getElementById("ai-log");
-
-aiSendBtn.onclick = async () => {
-  const text = aiInput.value.trim();
-  if (!text) return;
-  
-  appendAiLog(`마스터: ${text}`, true);
-  aiInput.value = "";
-  
-  try {
-    const res = await apiFetch("/api/ai/command", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: text, history: [] })
-    });
-    const data = await res.json();
-    appendAiLog(`AI: ${data.response}`);
-  } catch {
-    appendAiLog(`AI: 서버와 통신 중 오류가 발생했습니다.`);
-  }
-};
-
-function appendAiLog(text, isMaster = false) {
-  const group = document.createElement("div");
-  group.className = `msg-group ${isMaster ? "out" : "in"}`;
-  group.innerHTML = `<div class="bubble">${text}</div>`;
-  aiLog.appendChild(group);
-  aiLog.scrollTop = aiLog.scrollHeight;
-}
-
-// ── 기존 로직 (API Fetch 부분만 apiFetch로 교체) ──────────────────
+// 대화방 목록 불러오기
 async function loadDialogs() {
-  try {
-    const res = await apiFetch("/api/dialogs");
-    allDialogs = await res.json();
-    renderDialogList(allDialogs);
-  } catch {
-    document.getElementById("dialog-list").innerHTML = '<div class="list-placeholder"><span>연결 실패</span></div>';
-  }
-}
-
-function renderDialogList(dialogs) {
-  const list = document.getElementById("dialog-list");
-  list.innerHTML = dialogs.map(d => `
-    <div class="dialog-item" data-id="${d.id}" data-type="${d.type}">
-      <div class="avatar">${d.name[0]}</div>
-      <div class="dialog-info">
-        <div class="dialog-name">${d.name}</div>
-        <div class="dialog-type">${d.type}</div>
-      </div>
-    </div>
-  `).join("");
-
-  list.querySelectorAll(".dialog-item").forEach(el => {
-    el.onclick = () => {
-      const d = allDialogs.find(x => x.id === el.dataset.id);
-      if (d) openPanel(d);
-    };
-  });
-}
-
-async function openPanel(dialog) {
-  if (openPanels[dialog.id]) return;
-  const panel = buildPanel(dialog);
-  document.getElementById("panels-wrap").appendChild(panel.el);
-  openPanels[dialog.id] = panel;
-
-  const res = await apiFetch(`/api/history/${dialog.id}`);
-  const msgs = await res.json();
-  msgs.forEach(m => appendBubble(dialog.id, m));
-}
-
-function buildPanel(dialog) {
-  const el = document.createElement("div");
-  el.className = "chat-panel";
-  el.innerHTML = `
-    <div class="panel-header">
-      <div class="panel-name">${dialog.name}</div>
-      <button class="panel-close" onclick="this.closest('.chat-panel').remove(); delete openPanels['${dialog.id}'];">X</button>
-    </div>
-    <div class="messages"></div>
-    <div class="input-area">
-      <textarea class="msg-input" placeholder="메시지 입력..."></textarea>
-      <button class="send-btn">보내기</button>
-    </div>
-  `;
-  const input = el.querySelector(".msg-input");
-  const sendBtn = el.querySelector(".send-btn");
-  sendBtn.onclick = async () => {
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = "";
-    await apiFetch(`/api/send/${dialog.id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
+    const res = await fetch('/api/dialogs', {
+        headers: { 'Authorization': `Bearer ${authToken}` }
     });
-  };
-  return { el };
+    const dialogs = await res.json();
+    const list = document.getElementById('chat-list');
+    list.innerHTML = '';
+
+    dialogs.forEach(d => {
+        const item = document.createElement('div');
+        item.className = 'chat-item';
+        const initial = d.name.charAt(0);
+        item.innerHTML = `
+            <div class="chat-avatar">${initial}</div>
+            <div class="chat-info">
+                <div class="chat-name">${d.name}</div>
+                <div class="chat-last-msg">${d.unread > 0 ? `읽지 않은 메시지 ${d.unread}개` : '최근 대화 없음'}</div>
+            </div>
+        `;
+        item.onclick = () => selectChat(d.id, d.name);
+        list.appendChild(item);
+    });
 }
 
-function appendBubble(chatId, msg) {
-  const p = openPanels[chatId];
-  if (!p) return;
-  const msgsEl = p.el.querySelector(".messages");
-  const group = document.createElement("div");
-  group.className = `msg-group ${msg.out ? "out" : "in"}`;
-  group.innerHTML = `<div class="bubble">${msg.text}</div>`;
-  msgsEl.appendChild(group);
-  msgsEl.scrollTop = msgsEl.scrollHeight;
+// 채팅 선택
+async function selectChat(id, name) {
+    currentChatId = id;
+    document.getElementById('current-chat-name').innerText = name;
+    
+    // 활성화 표시
+    document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    loadHistory(id);
 }
 
-function incrementUnreadBadge(id) { /* 생략 - UI 개선 시 추가 가능 */ }
+// 대화 내역 불러오기
+async function loadHistory(chatId) {
+    const res = await fetch(`/api/history/${chatId}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const messages = await res.json();
+    const area = document.getElementById('message-area');
+    area.innerHTML = '';
+
+    messages.forEach(m => {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${m.out ? 'sent' : 'received'}`;
+        msgDiv.innerHTML = `
+            ${!m.out ? `<div class="message-sender">${m.sender}</div>` : ''}
+            <div class="message-text">${m.text}</div>
+        `;
+        area.appendChild(msgDiv);
+    });
+    area.scrollTop = area.scrollHeight;
+}
+
+// 메시지 전송
+document.getElementById('send-btn').addEventListener('click', async () => {
+    const input = document.getElementById('message-input');
+    const text = input.value;
+    if (!text || !currentChatId) return;
+
+    try {
+        await fetch(`/api/send/${currentChatId}`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ text })
+        });
+        input.value = '';
+        loadHistory(currentChatId);
+    } catch (e) { alert('전송 실패'); }
+});
+
+// AI 요약 버튼
+document.getElementById('ai-summarize-btn').addEventListener('click', async () => {
+    if (!currentChatId) return;
+    const btn = document.getElementById('ai-summarize-btn');
+    btn.innerText = 'AI 분석 중...';
+    
+    try {
+        const res = await fetch('/api/ai/command', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ command: `${currentChatId}번 채팅의 최근 대화를 3줄로 요약해줘.` })
+        });
+        const data = await res.json();
+        alert(`[AI 요약 리포트]\n\n${data.response}`);
+    } catch (e) { alert('AI 요약 실패'); }
+    finally { btn.innerText = 'AI 요약'; }
+});
