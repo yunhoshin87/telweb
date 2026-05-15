@@ -7,10 +7,10 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
-    "@mtcute/node": "^0.20.0",
     "dotenv": "^16.4.5",
+    "gramjs": "^2.26.16",
     "hono": "^4.6.9",
-    "@hono/node-server/serve-static": "^1.13.7"
+    "input": "^1.0.1"
   },
   "engines": {
     "node": ">=20.0.0"
